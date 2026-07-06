@@ -19,15 +19,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,7 +59,11 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 
 
 @Composable
-fun HomeRoute(modifier: Modifier = Modifier) {
+fun HomeRoute(
+    onNavigateToAddNote: () -> Unit,
+    onNavigateToEditNote: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
 
     val context = LocalContext.current
     val database = remember { NoteDatabase.getInstance(context) }
@@ -72,6 +77,8 @@ fun HomeRoute(modifier: Modifier = Modifier) {
     HomeScreen(
         uiState = uiState,
         onEvent = homeViewModel::onEvent,
+        onAddClick = onNavigateToAddNote,
+        onNoteClick = onNavigateToEditNote
     )
 }
 
@@ -80,6 +87,8 @@ fun HomeRoute(modifier: Modifier = Modifier) {
 fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
+    onAddClick: () -> Unit,
+    onNoteClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -108,7 +117,7 @@ fun HomeScreen(
 
                     }) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
+                            imageVector = Icons.Default.Add,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -116,6 +125,15 @@ fun HomeScreen(
                 }
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    onAddClick()
+                }
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -124,14 +142,14 @@ fun HomeScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextForm(
-                uiState = uiState,
-                onEvent = onEvent,
-                onDone = {
-                    keyboardController?.hide()
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+//            TextForm(
+//                uiState = uiState,
+//                onEvent = onEvent,
+//                onDone = {
+//                    keyboardController?.hide()
+//                }
+//            )
+//            Spacer(modifier = Modifier.height(12.dp))
             FilterView(
                 uiState = uiState,
                 onEvent = onEvent,
@@ -166,6 +184,9 @@ fun HomeScreen(
                                 onEvent(HomeUiEvent.OnFavorChange(itemId = note.id))
                             },
                             onDelete = { onEvent(HomeUiEvent.OnDeleteNoteClick(note.id)) },
+                            modifier = Modifier.clickable {
+                                onNoteClick(note.id)
+                            }
                         )
                     }
                 }
@@ -462,9 +483,11 @@ fun HomePreview() {
                 currentFilter = FilterList.ALL,
                 errorInputTitle = "",
                 errorInputContent = "",
-                isLoading = true
+                isLoading = false
             ),
             onEvent = {},
+            onAddClick = {},
+            onNoteClick = {}
         )
     }
 }

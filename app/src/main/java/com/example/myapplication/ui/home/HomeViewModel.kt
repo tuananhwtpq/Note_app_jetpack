@@ -34,11 +34,23 @@ class HomeViewModel(private val repository: NoteRepository) : ViewModel() {
     }
 
     private fun updateInputTitle(title: String) {
-        _uiState.update { it.copy(inputTitle = title) }
+        _uiState.update {
+            it.copy(
+                inputTitle = title,
+                errorInputTitle = "",
+                errorInputContent = ""
+            )
+        }
     }
 
     private fun updateInputContent(content: String) {
-        _uiState.update { it.copy(inputContent = content) }
+        _uiState.update {
+            it.copy(
+                inputContent = content,
+                errorInputContent = "",
+                errorInputTitle = ""
+            )
+        }
     }
 
     private fun changeFilter(filter: FilterList) {
