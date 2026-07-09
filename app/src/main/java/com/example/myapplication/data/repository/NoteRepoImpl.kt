@@ -12,12 +12,20 @@ class NoteRepoImpl(private val noteDao: NoteDao) : NoteRepository {
         noteDao.insertNote(note.toNoteEntity())
     }
 
-    override suspend fun updateNote(noteId: Long) {
-        noteDao.updateNote(noteId)
+    override suspend fun updateFavorNote(noteId: Long) {
+        noteDao.updateFavorNote(noteId)
+    }
+
+    override suspend fun updateNote(note: NoteItem) {
+        noteDao.updateNote(note.toNoteEntity())
     }
 
     override suspend fun deleteNote(noteId: Long) {
         noteDao.deleteNote(noteId)
+    }
+
+    override fun getNoteById(noteId: Long): NoteItem {
+        return noteDao.getNoteById(noteId).toNoteItem()
     }
 
     override fun getAllNotes(): Flow<List<NoteItem>> {

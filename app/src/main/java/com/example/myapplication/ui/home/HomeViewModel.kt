@@ -59,7 +59,7 @@ class HomeViewModel(private val repository: NoteRepository) : ViewModel() {
 
     private fun changeFavorItem(itemId: Long) {
         viewModelScope.launch {
-            repository.updateNote(itemId)
+            repository.updateFavorNote(itemId)
         }
     }
 

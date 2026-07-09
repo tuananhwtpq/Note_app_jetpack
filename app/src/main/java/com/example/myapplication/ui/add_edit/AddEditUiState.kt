@@ -4,5 +4,6 @@ data class AddEditUiState(
     val inputTitle: String = "",
     val inputContent: String = "",
     val errorInputTitle: String = "",
-    val errorInputContent: String = ""
+    val errorInputContent: String = "",
+    val isSaveDone: Boolean = false
 )

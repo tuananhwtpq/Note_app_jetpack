@@ -19,39 +19,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.data.local.NoteDatabase
-import com.example.myapplication.data.repository.NoteRepoImpl
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
 
 @Composable
 fun AddEditNoteRoute(
+    viewModel: AddEditViewModel,
     noteId: Long,
     onBack: () -> Unit
 ) {
     val isEditMode = noteId != -1L
-    val context = LocalContext.current
-    val database = remember { NoteDatabase.getInstance(context) }
-    val repository = remember { NoteRepoImpl(database.noteDao()) }
-    val addEditViewModel: AddEditViewModel = viewModel(
-        factory = AddEditViewModelFactory(repository)
-    )
 
-    val uiState by addEditViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     AddEditNoteScreen(
         uiState = uiState,
-        onEvent = addEditViewModel::onEvent,
+        onEvent = viewModel::onEvent,
         isEditMote = isEditMode,
         onBackClick = onBack
     )
@@ -175,9 +165,19 @@ fun AddEditNoteScreen(
 
             Button(
                 onClick = {
-                    onEvent(AddEditUiEvent.OnAddNote)
-                    keyboardController?.hide()
-                    onBackClick()
+                    if (!isEditMote) {
+                        onEvent(AddEditUiEvent.OnAddNote)
+                        if (uiState.isSaveDone) {
+                            keyboardController?.hide()
+                            onBackClick()
+                        }
+                    } else {
+                        onEvent(AddEditUiEvent.OnUpdateNote)
+                    }
+
+//                    onEvent(AddEditUiEvent.OnAddNote)
+//                    keyboardController?.hide()
+//                    onBackClick()
                 }, modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
