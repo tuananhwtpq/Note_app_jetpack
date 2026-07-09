@@ -14,18 +14,30 @@ class AddEditViewModel(
     private val noteId: Long? = null
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AddEditUiState())
+    private val _uiState = MutableStateFlow(
+        AddEditUiState(
+            noteId = noteId ?: -1L,
+            isLoading = noteId != null && noteId != -1L
+        )
+    )
     val uiState = _uiState.asStateFlow()
 
     init {
         if (noteId != -1L && noteId != null) {
             viewModelScope.launch {
                 val currentNote = noteRepository.getNoteById(noteId)
-                _uiState.update {
-                    it.copy(
-                        inputTitle = currentNote.title,
-                        inputContent = currentNote.content
-                    )
+                _uiState.update { currentState ->
+                    if (currentNote == null) {
+                        currentState.copy(isLoading = false)
+                    } else {
+                        currentState.copy(
+                            noteId = currentNote.id,
+                            inputTitle = currentNote.title,
+                            inputContent = currentNote.content,
+                            isFavor = currentNote.isFavor,
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }
@@ -33,43 +45,9 @@ class AddEditViewModel(
 
     fun onEvent(event: AddEditUiEvent) {
         when (event) {
-            AddEditUiEvent.OnAddNote -> addNoteToList()
+            AddEditUiEvent.OnSaveNoteClick -> saveNote()
             is AddEditUiEvent.OnInputContentChange -> updateInputContent(event.content)
             is AddEditUiEvent.OnInputTitleChange -> updateInputTitle(event.title)
-            AddEditUiEvent.OnUpdateNote -> updateNoteById()
-        }
-    }
-
-    private fun updateNoteById() {
-        val title = uiState.value.inputTitle
-        val content = uiState.value.inputContent
-
-        if (title.isEmpty()) {
-            _uiState.update { it.copy(errorInputTitle = "Please enter title") }
-            return
-        }
-
-        if (content.isEmpty()) {
-            _uiState.update { it.copy(errorInputContent = "Please enter content") }
-            return
-        }
-
-        val updatedNote = NoteItem(
-            id = noteId ?: 0L,
-            title = title,
-            content = content
-        )
-
-        viewModelScope.launch {
-            noteRepository.updateNote(updatedNote)
-            _uiState.update {
-                it.copy(
-                    inputTitle = "",
-                    inputContent = "",
-                    errorInputTitle = "",
-                    errorInputContent = ""
-                )
-            }
         }
     }
 
@@ -81,9 +59,9 @@ class AddEditViewModel(
         _uiState.update { it.copy(inputContent = content, errorInputContent = "") }
     }
 
-    private fun addNoteToList() {
-        val title = uiState.value.inputTitle
-        val content = uiState.value.inputContent
+    private fun saveNote() {
+        val title = uiState.value.inputTitle.trim()
+        val content = uiState.value.inputContent.trim()
 
         if (title.isEmpty()) {
             _uiState.update { it.copy(errorInputTitle = "Please enter title") }
@@ -95,23 +73,20 @@ class AddEditViewModel(
             return
         }
 
-        val newNote = NoteItem(
+        val noteToSave = NoteItem(
+            id = uiState.value.noteId.takeIf { it != -1L } ?: 0L,
             title = title,
             content = content,
-            isFavor = false
+            isFavor = uiState.value.isFavor
         )
 
         viewModelScope.launch {
-            noteRepository.addNote(newNote)
-            _uiState.update {
-                it.copy(
-                    inputTitle = "",
-                    inputContent = "",
-                    errorInputTitle = "",
-                    errorInputContent = "",
-                    isSaveDone = true
-                )
+            if (uiState.value.noteId == -1L) {
+                noteRepository.addNote(noteToSave)
+            } else {
+                noteRepository.updateNote(noteToSave)
             }
+            _uiState.update { it.copy(isSaveDone = true) }
         }
     }
 

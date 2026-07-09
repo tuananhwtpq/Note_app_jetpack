@@ -24,8 +24,8 @@ class NoteRepoImpl(private val noteDao: NoteDao) : NoteRepository {
         noteDao.deleteNote(noteId)
     }
 
-    override fun getNoteById(noteId: Long): NoteItem {
-        return noteDao.getNoteById(noteId).toNoteItem()
+    override suspend fun getNoteById(noteId: Long): NoteItem? {
+        return noteDao.getNoteById(noteId)?.toNoteItem()
     }
 
     override fun getAllNotes(): Flow<List<NoteItem>> {

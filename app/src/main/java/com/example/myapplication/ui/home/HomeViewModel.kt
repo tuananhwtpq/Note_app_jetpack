@@ -2,7 +2,6 @@ package com.example.myapplication.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.model.NoteItem
 import com.example.myapplication.data.repository.NoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,32 +23,9 @@ class HomeViewModel(private val repository: NoteRepository) : ViewModel() {
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {
-            HomeUiEvent.OnAddNoteClick -> addNoteToList()
             is HomeUiEvent.OnDeleteNoteClick -> deleteNote(event.itemId)
             is HomeUiEvent.OnFavorChange -> changeFavorItem(event.itemId)
             is HomeUiEvent.OnFilterChanged -> changeFilter(event.filter)
-            is HomeUiEvent.OnInputContentChange -> updateInputContent(event.content)
-            is HomeUiEvent.OnInputTitleChange -> updateInputTitle(event.title)
-        }
-    }
-
-    private fun updateInputTitle(title: String) {
-        _uiState.update {
-            it.copy(
-                inputTitle = title,
-                errorInputTitle = "",
-                errorInputContent = ""
-            )
-        }
-    }
-
-    private fun updateInputContent(content: String) {
-        _uiState.update {
-            it.copy(
-                inputContent = content,
-                errorInputContent = "",
-                errorInputTitle = ""
-            )
         }
     }
 
@@ -68,41 +44,4 @@ class HomeViewModel(private val repository: NoteRepository) : ViewModel() {
             repository.deleteNote(itemId)
         }
     }
-
-    private fun addNoteToList() {
-
-        val title = uiState.value.inputTitle
-        val content = uiState.value.inputContent
-
-        if (title.isEmpty()) {
-            _uiState.update { it.copy(errorInputTitle = "Title cannot empty") }
-            return
-        }
-
-        if (content.isEmpty()) {
-            _uiState.update { it.copy(errorInputContent = "Content cannot empty") }
-            return
-        }
-
-        val newItem = NoteItem(
-            id = 0L,
-            title = title,
-            content = content,
-            isFavor = false
-        )
-
-        viewModelScope.launch {
-            repository.addNote(newItem)
-            _uiState.update {
-                it.copy(
-                    inputTitle = "",
-                    inputContent = "",
-                    errorInputTitle = "",
-                    errorInputContent = ""
-                )
-            }
-        }
-    }
-
-
 }

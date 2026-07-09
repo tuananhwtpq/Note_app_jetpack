@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,9 +73,6 @@ fun HomeScreen(
     onNoteClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -332,8 +328,6 @@ fun HomePreview() {
     MyApplicationTheme {
         HomeScreen(
             uiState = HomeUiState(
-                inputTitle = "Sample Title",
-                inputContent = "Sample Content",
                 noteList = listOf(
                     NoteItem(id = 1, title = "Note 1", content = "Content 1", isFavor = false),
                     NoteItem(
@@ -345,8 +339,6 @@ fun HomePreview() {
                     NoteItem(id = 3, title = "Note 3", content = "Content 3", isFavor = false),
                 ),
                 currentFilter = FilterList.ALL,
-                errorInputTitle = "",
-                errorInputContent = "",
                 isLoading = false
             ),
             onEvent = {},

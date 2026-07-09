@@ -21,8 +21,8 @@ interface NoteDao {
     @Query("DELETE FROM note_table WHERE id = :itemId")
     suspend fun deleteNote(itemId: Long)
 
-    @Query("SELECT * FROM note_table WHERE id= :noteId")
-    fun getNoteById(noteId: Long): NoteEntity
+    @Query("SELECT * FROM note_table WHERE id = :noteId")
+    suspend fun getNoteById(noteId: Long): NoteEntity?
 
 
     @Query("UPDATE note_table SET isFavor = NOT isFavor WHERE id = :itemId")
